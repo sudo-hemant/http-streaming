@@ -66,11 +66,11 @@ export default function SSEPage() {
       source.close();
     });
 
-    source.addEventListener('error', (event) => {
-      const errorData = JSON.parse(event.data);
-      setError(errorData.error);
+    source.addEventListener('error', () => {
+      // Note: SSE 'error' events are generic Event objects, not MessageEvent
+      // Our custom 'error' event type is handled differently
+      setError('Connection error occurred');
       setIsConnected(false);
-      source.close();
     });
   };
 

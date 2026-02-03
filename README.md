@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HTTP Streaming Demo
 
-## Getting Started
+A Next.js demo project showcasing two HTTP streaming approaches:
 
-First, run the development server:
+1. **HTTP Chunked Streaming** - Using fetch API with `Transfer-Encoding: chunked`
+2. **Server-Sent Events (SSE)** - Using the EventSource API
+
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) for the Chunked Streaming demo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000/sse](http://localhost:3000/sse) for the SSE demo.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API Endpoints
+
+| Endpoint | Type | Description |
+|----------|------|-------------|
+| `GET /api/stream` | Chunked | Streams JSON data chunks every 1.5s |
+| `GET /api/sse` | SSE | Streams events with types (update, notification) |
+
+## Project Structure
+
+```
+app/
+├── api/
+│   ├── stream/route.ts    # Chunked streaming endpoint
+│   └── sse/route.ts       # Server-Sent Events endpoint
+├── lib/
+│   └── streaming.ts       # Reusable streaming utilities
+├── page.tsx               # Chunked streaming demo page
+└── sse/page.tsx           # SSE demo page
+```
+
+## Streaming Utilities
+
+The `app/lib/streaming.ts` file provides helper functions:
+
+```typescript
+import { createChunkedResponse, createSSEResponse, delay } from '@/app/lib/streaming';
+
+// Chunked streaming
+async function* generateData() {
+  for (let i = 1; i <= 5; i++) {
+    yield { count: i };
+    await delay(1000);
+  }
+}
+return createChunkedResponse(generateData());
+
+// SSE streaming
+async function* generateEvents() {
+  yield { data: { message: 'Hello' }, event: 'update', id: 1 };
+}
+return createSSEResponse(generateEvents());
+```
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+See **[STREAMING_GUIDE.md](./STREAMING_GUIDE.md)** for a comprehensive guide covering:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- How HTTP streaming works
+- TextEncoder, ReadableStream, and Controller explained
+- Step-by-step code walkthroughs
+- SSE vs Chunked streaming comparison
+- Client-side consumption patterns
+- Real-world examples (ChatGPT-style, notifications)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 15
+- TypeScript
+- Web Streams API
+- Server-Sent Events
